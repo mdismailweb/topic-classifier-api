@@ -46,13 +46,20 @@ class BasicTextPreprocessor:
 # Load model artifacts at startup
 def load_model():
     try:
-        artifacts = joblib.load('model_artifacts.joblib')
+        # Look for model in the same directory as the script
+        model_path = Path(__file__).parent / 'model_artifacts.joblib'
+        artifacts = joblib.load(str(model_path))
+        print("Model loaded successfully")
         return artifacts
     except Exception as e:
         print(f"Error loading model: {e}")
         return None
 
 model_artifacts = load_model()
+
+# Initialize app with model status
+if model_artifacts is None:
+    print("WARNING: Model failed to load. API will return errors for predictions.")
 
 @app.route('/health', methods=['GET'])
 def health_check():
