@@ -1,8 +1,18 @@
-from flask import Flask, request, jsonify
+#!/usr/bin/env python3
+"""
+Multi-label Topic Classification API
+Author: Your Name
+Date: September 13, 2025
+
+This Flask API provides topic classification for research papers.
+"""
+
+from flask import Flask, request, jsonify, render_template
 import joblib
 import numpy as np
 from pathlib import Path
 import re
+import os
 
 app = Flask(__name__)
 
@@ -136,5 +146,57 @@ def predict_topics():
             'error': f'Prediction failed: {str(e)}'
         }), 500
 
+@app.route('/')
+def home():
+    """Home page with API documentation."""
+    return '''
+    <html>
+        <head>
+            <title>Topic Classification API</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 40px; }
+                pre { background: #f4f4f4; padding: 15px; border-radius: 5px; }
+                .endpoint { margin: 20px 0; }
+            </style>
+        </head>
+        <body>
+            <h1>Research Paper Topic Classification API</h1>
+            <p>This API classifies research papers into multiple topics based on their title and abstract.</p>
+            
+            <div class="endpoint">
+                <h2>Health Check</h2>
+                <pre>GET /health</pre>
+                <p>Check if the API is running and model is loaded.</p>
+            </div>
+            
+            <div class="endpoint">
+                <h2>Predict Topics</h2>
+                <pre>POST /predict
+Content-Type: application/json
+
+{
+    "title": "Your paper title",
+    "abstract": "Your paper abstract",
+    "confidence_threshold": 0.3
+}</pre>
+                <p>Returns predicted topics with confidence scores.</p>
+            </div>
+            
+            <div class="endpoint">
+                <h2>Available Topics</h2>
+                <ul>
+                    <li>Computer Science</li>
+                    <li>Physics</li>
+                    <li>Mathematics</li>
+                    <li>Statistics</li>
+                    <li>Quantitative Biology</li>
+                    <li>Quantitative Finance</li>
+                </ul>
+            </div>
+        </body>
+    </html>
+    '''
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000)
+    port = int(os.environ.get('PORT', 8000))
+    app.run(host='0.0.0.0', port=port)
