@@ -46,20 +46,41 @@ class BasicTextPreprocessor:
 # Load model artifacts at startup
 def load_model():
     try:
-        # Look for model in the same directory as the script
-        model_path = Path(__file__).parent / 'model_artifacts.joblib'
-        artifacts = joblib.load(str(model_path))
-        print("Model loaded successfully")
-        return artifacts
+        # Try multiple possible paths for the model
+        possible_paths = [
+            Path(__file__).parent / 'model_artifacts.joblib',  # Same directory as script
+            Path.cwd() / 'model_artifacts.joblib',            # Current working directory
+            Path('/app/model_artifacts.joblib'),              # Root of deployment
+        ]
+        
+        # Try each path
+        for path in possible_paths:
+            print(f"Trying to load model from: {path}")
+            if path.exists():
+                print(f"Found model at: {path}")
+                artifacts = joblib.load(str(path))
+                print("Model loaded successfully")
+                return artifacts
+            else:
+                print(f"Model not found at: {path}")
+        
+        print("ERROR: Model file not found in any expected location")
+        return None
     except Exception as e:
-        print(f"Error loading model: {e}")
+        import traceback
+        print(f"Error loading model: {str(e)}")
+        print("Traceback:")
+        print(traceback.format_exc())
         return None
 
+print("Starting model loading process...")
 model_artifacts = load_model()
 
 # Initialize app with model status
 if model_artifacts is None:
     print("WARNING: Model failed to load. API will return errors for predictions.")
+else:
+    print(f"Model loaded successfully with topics: {model_artifacts.get('topics', [])}")
 
 @app.route('/health', methods=['GET'])
 def health_check():
