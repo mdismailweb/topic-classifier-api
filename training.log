@@ -1,0 +1,40 @@
+2025-09-13 13:55:23,202 - INFO - Loading data...
+2025-09-13 13:55:23,477 - INFO - Preprocessing text data...
+2025-09-13 13:55:24,540 - INFO - 
+Initial class distribution:
+2025-09-13 13:55:24,540 - INFO - Computer Science: 8594
+2025-09-13 13:55:24,540 - INFO - Physics: 6013
+2025-09-13 13:55:24,540 - INFO - Mathematics: 5618
+2025-09-13 13:55:24,541 - INFO - Statistics: 5206
+2025-09-13 13:55:24,541 - INFO - Quantitative Biology: 587
+2025-09-13 13:55:24,541 - INFO - Quantitative Finance: 249
+2025-09-13 13:55:24,546 - INFO - Augmented Quantitative Biology with 413 samples
+2025-09-13 13:55:24,547 - INFO - Augmented Quantitative Finance with 249 samples
+2025-09-13 13:55:24,551 - INFO - Total samples after augmentation: 21634
+2025-09-13 13:55:24,553 - INFO - Vectorizing text data...
+2025-09-13 13:55:32,830 - INFO - Performing cross-validation...
+2025-09-13 13:55:39,668 - INFO - 
+Cross-validation results:
+2025-09-13 13:55:39,668 - INFO - accuracy:
+2025-09-13 13:55:39,668 - INFO -   Train: 0.7417 (+/- 0.0024)
+2025-09-13 13:55:39,668 - INFO -   Val:   0.6534 (+/- 0.0676)
+2025-09-13 13:55:39,669 - INFO - f1_micro:
+2025-09-13 13:55:39,669 - INFO -   Train: 0.8730 (+/- 0.0010)
+2025-09-13 13:55:39,669 - INFO -   Val:   0.8131 (+/- 0.0525)
+2025-09-13 13:55:39,669 - INFO - f1_macro:
+2025-09-13 13:55:39,669 - INFO -   Train: 0.8131 (+/- 0.0914)
+2025-09-13 13:55:39,669 - INFO -   Val:   0.7184 (+/- 0.0630)
+2025-09-13 13:55:39,670 - INFO - precision_macro:
+2025-09-13 13:55:39,670 - INFO -   Train: 0.8933 (+/- 0.0158)
+2025-09-13 13:55:39,670 - INFO -   Val:   0.8217 (+/- 0.0462)
+2025-09-13 13:55:39,670 - INFO - recall_macro:
+2025-09-13 13:55:39,670 - INFO -   Train: 0.7725 (+/- 0.0940)
+2025-09-13 13:55:39,670 - INFO -   Val:   0.6741 (+/- 0.0542)
+2025-09-13 13:55:39,670 - INFO - 
+Training final model on full dataset...
+2025-09-13 13:55:41,576 - INFO - Analyzing model performance...
+2025-09-13 13:55:45,667 - INFO - Saving enhanced model artifacts...
+2025-09-13 13:55:46,649 - INFO - Saved model artifacts to model_artifacts.joblib
+2025-09-13 13:55:46,650 - INFO - Created visualizations in .
+2025-09-13 13:55:46,650 - INFO - Created API example at example_usage.py
+2025-09-13 13:55:46,650 - INFO - Training complete! Enhanced model and analysis files have been saved.
