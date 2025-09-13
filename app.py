@@ -46,44 +46,21 @@ class BasicTextPreprocessor:
 # Load model artifacts at startup
 def load_model():
     try:
-        # Try to load the smaller model
-        model_file = 'model_small.joblib'
-        possible_paths = [
-            Path(__file__).parent / model_file,
-            Path.cwd() / model_file,
-            Path('/app') / model_file
-        ]
+        # Look for minimal model in the same directory as the script
+        model_path = Path(__file__).parent / 'minimal_model.joblib'
+        print(f"Attempting to load model from: {model_path}")
         
-        for path in possible_paths:
-            print(f"Trying to load model from: {path}")
-            if path.exists():
-                print(f"Found model at: {path}")
-                artifacts = joblib.load(str(path))
-                print("Model loaded successfully")
-                return artifacts
-            else:
-                print(f"Model not found at: {path}")
+        if not model_path.exists():
+            print(f"Model file not found at {model_path}")
+            return None
+            
+        print("Loading model...")
+        artifacts = joblib.load(str(model_path))
+        print("Model loaded successfully!")
+        return artifacts
         
-        print("Model not found, trying original model...")
-        
-        # Try original model as fallback
-        original_file = 'model_artifacts.joblib'
-        for path in [Path(p).parent / original_file for p in possible_paths]:
-            print(f"Trying to load original model from: {path}")
-            if path.exists():
-                print(f"Found original model at: {path}")
-                artifacts = joblib.load(str(path))
-                print("Original model loaded successfully")
-                return artifacts
-            else:
-                print(f"Original model not found at: {path}")
-        
-        raise FileNotFoundError("No model file found in any location")
     except Exception as e:
-        import traceback
         print(f"Error loading model: {str(e)}")
-        print("Traceback:")
-        print(traceback.format_exc())
         return None
 
 print("Starting model loading process...")
