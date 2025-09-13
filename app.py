@@ -13,6 +13,10 @@ import numpy as np
 from pathlib import Path
 import re
 import os
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.multiclass import OneVsRestClassifier
 
 app = Flask(__name__)
 
@@ -46,29 +50,107 @@ class BasicTextPreprocessor:
 # Load model artifacts at startup
 def load_model():
     try:
-        # Look for minimal model in the same directory as the script
-        model_path = Path(__file__).parent / 'minimal_model.joblib'
-        print(f"Attempting to load model from: {model_path}")
+        # List of possible model paths
+        model_paths = [
+            Path(__file__).parent / 'minimal_model.joblib',
+            Path('/opt/render/project/src/minimal_model.joblib'),
+            Path.cwd() / 'minimal_model.joblib'
+        ]
         
-        if not model_path.exists():
-            print(f"Model file not found at {model_path}")
-            return None
-            
-        print("Loading model...")
-        artifacts = joblib.load(str(model_path))
-        print("Model loaded successfully!")
-        return artifacts
+        # Try all possible paths
+        for model_path in model_paths:
+            try:
+                print(f"Attempting to load model from: {model_path}")
+                if model_path.exists():
+                    print(f"Found model file at: {model_path}")
+                    print("Loading model...")
+                    
+                    # Try to open the file first to check permissions
+                    with open(model_path, 'rb') as f:
+                        print("File opened successfully")
+                    
+                    # Now try to load the model
+                    artifacts = joblib.load(str(model_path))
+                    print("Model loaded successfully!")
+                    return artifacts
+                else:
+                    print(f"Model file not found at: {model_path}")
+            except PermissionError as pe:
+                print(f"Permission error for {model_path}: {str(pe)}")
+            except Exception as e:
+                print(f"Error trying path {model_path}: {str(e)}")
+                import traceback
+                print(traceback.format_exc())
+        
+        print("No valid model file found in any location")
+        return None
         
     except Exception as e:
-        print(f"Error loading model: {str(e)}")
+        print(f"Unexpected error in load_model: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
         return None
+
+# Fallback minimal model for testing
+FALLBACK_MODEL = {
+    'topics': ['Computer Science', 'Physics', 'Mathematics', 'Statistics', 'Quantitative Biology', 'Quantitative Finance'],
+    'vectorizer': TfidfVectorizer(max_features=100),
+    'classifier': OneVsRestClassifier(LogisticRegression())
+}
 
 print("Starting model loading process...")
 model_artifacts = load_model()
 
 # Initialize app with model status
 if model_artifacts is None:
-    print("WARNING: Model failed to load. API will return errors for predictions.")
+    print("WARNING: Main model failed to load. Initializing fallback model...")
+    try:
+        # Hard-coded training data for absolute fallback
+        FALLBACK_DATA = {
+            'texts': [
+                "Deep learning for computer vision applications",
+                "Quantum mechanics and particle physics",
+                "Advanced calculus and mathematical analysis",
+                "Statistical methods in data analysis",
+                "Gene expression in biological systems",
+                "Stock market prediction using machine learning"
+            ],
+            'labels': [
+                [1, 0, 0, 0, 0, 0],  # CS
+                [0, 1, 0, 0, 0, 0],  # Physics
+                [0, 0, 1, 0, 0, 0],  # Math
+                [0, 0, 0, 1, 0, 0],  # Stats
+                [0, 0, 0, 0, 1, 0],  # Bio
+                [0, 0, 0, 0, 0, 1]   # Finance
+            ]
+        }
+        
+        try:
+            # First try with train.csv if available
+            if os.path.exists('train.csv'):
+                print("Found train.csv, using it for fallback model...")
+                train_df = pd.read_csv('train.csv', nrows=1000)
+                train_df['text'] = train_df['TITLE'] + ' ' + train_df['ABSTRACT'].fillna('')
+                texts = train_df['text'].values
+                y = train_df[FALLBACK_MODEL['topics']].values
+            else:
+                print("train.csv not found, using hard-coded fallback data...")
+                texts = FALLBACK_DATA['texts']
+                y = np.array(FALLBACK_DATA['labels'])
+            
+            # Fit the vectorizer and classifier
+            X = FALLBACK_MODEL['vectorizer'].fit_transform(texts)
+            FALLBACK_MODEL['classifier'].fit(X, y)
+            
+            model_artifacts = FALLBACK_MODEL
+            print("Fallback model initialized successfully!")
+        except Exception as e:
+            print(f"Error training fallback model with data: {str(e)}")
+            raise
+            
+    except Exception as e:
+        print(f"Error initializing fallback model: {str(e)}")
+        print("WARNING: No working model available. API will return errors for predictions.")
 else:
     print(f"Model loaded successfully with topics: {model_artifacts.get('topics', [])}")
 
